@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/erhemdiputra/practice-mvc/handler"
+	"github.com/erhemdiputra/exec-go-di/handler"
 	"github.com/julienschmidt/httprouter"
 )
 

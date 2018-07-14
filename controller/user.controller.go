@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"github.com/erhemdiputra/practice-mvc/models"
-	"github.com/erhemdiputra/practice-mvc/service"
+	"github.com/erhemdiputra/exec-go-di/models"
+	"github.com/erhemdiputra/exec-go-di/service"
 )
 
 type UserController struct {

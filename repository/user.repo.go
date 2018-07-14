@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/erhemdiputra/practice-mvc/models"
+	"github.com/erhemdiputra/exec-go-di/models"
 )
 
 type IUserRepo interface {

@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/erhemdiputra/practice-mvc/models"
-	"github.com/erhemdiputra/practice-mvc/repository"
+	"github.com/erhemdiputra/exec-go-di/models"
+	"github.com/erhemdiputra/exec-go-di/repository"
 )
 
 type IUserService interface {

@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/erhemdiputra/practice-mvc/controller"
-	"github.com/erhemdiputra/practice-mvc/repository"
-	"github.com/erhemdiputra/practice-mvc/service"
+	"github.com/erhemdiputra/exec-go-di/controller"
+	"github.com/erhemdiputra/exec-go-di/repository"
+	"github.com/erhemdiputra/exec-go-di/service"
 
 	"github.com/julienschmidt/httprouter"
 )
