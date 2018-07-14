@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/erhemdiputra/exec-go-di/models"
+	"github.com/erhemdiputra/go-di/models"
 )
 
 type IUserRepo interface {
