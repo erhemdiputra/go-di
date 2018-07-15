@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/go-sql-driver/mysql"
+  packages = ["."]
+  revision = "d523deb1b23d913de5bdada721a6071e71283618"
+  version = "v1.4.0"
+
+[[projects]]
   name = "github.com/julienschmidt/httprouter"
   packages = ["."]
   revision = "8c199fb6259ffc1af525cc3ad52ee60ba8359669"
@@ -27,6 +33,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "acd6010f4bab2d25931265ebc3702d4943ec86fabed3deab57f0c95c52006d9a"
+  inputs-digest = "3996947bbfcbaa9b08a30650ae68b9c53103dd69a7f9a364a59e169393af868e"
   solver-name = "gps-cdcl"
   solver-version = 1
