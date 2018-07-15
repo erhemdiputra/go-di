@@ -7,7 +7,6 @@ import (
 	"github.com/erhemdiputra/go-di/controller"
 	"github.com/erhemdiputra/go-di/repository"
 	"github.com/erhemdiputra/go-di/service"
-
 	"github.com/julienschmidt/httprouter"
 )
 
