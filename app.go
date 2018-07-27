@@ -9,7 +9,6 @@ import (
 	"github.com/erhemdiputra/go-di/database"
 	"github.com/erhemdiputra/go-di/handler"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -25,12 +24,10 @@ func main() {
 	}
 	defer database.Get().Close()
 
-	router := mux.NewRouter()
-
-	userHandler := handler.NewUserHandler(router)
+	userHandler := handler.NewUserHandler()
 	userHandler.Serve()
 
 	port := globalCfg.Server.Port
 	log.Printf("Listening on Port %d\n", port)
-	http.ListenAndServe(fmt.Sprintf(":%d", port), router)
+	http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 }
