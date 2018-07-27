@@ -19,6 +19,7 @@ type ServerConfig struct {
 	Host        string
 	Port        int
 	Debug       bool
+	Timeout     string
 }
 
 type DatabaseConfig struct {

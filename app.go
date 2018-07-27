@@ -9,7 +9,7 @@ import (
 	"github.com/erhemdiputra/go-di/database"
 	"github.com/erhemdiputra/go-di/handler"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/julienschmidt/httprouter"
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -25,7 +25,7 @@ func main() {
 	}
 	defer database.Get().Close()
 
-	router := httprouter.New()
+	router := mux.NewRouter()
 
 	userHandler := handler.NewUserHandler(router)
 	userHandler.Serve()
