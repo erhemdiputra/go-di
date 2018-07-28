@@ -24,8 +24,8 @@ func main() {
 	}
 	defer database.Get().Close()
 
-	userHandler := handler.NewUserHandler()
-	userHandler.Serve()
+	playerHandler := handler.NewPlayerHandler(database.Get())
+	playerHandler.Serve()
 
 	port := globalCfg.Server.Port
 	log.Printf("Listening on Port %d\n", port)
