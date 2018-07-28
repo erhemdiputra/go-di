@@ -17,6 +17,6 @@ func NewPlayerController(PlayerService service.IPlayerService) *PlayerController
 	}
 }
 
-func (c *PlayerController) GetList(ctx context.Context) ([]models.Player, error) {
-	return c.PlayerService.GetList(ctx)
+func (c *PlayerController) GetList(ctx context.Context, form models.PlayerForm) ([]models.PlayerResponse, error) {
+	return c.PlayerService.GetList(ctx, form)
 }

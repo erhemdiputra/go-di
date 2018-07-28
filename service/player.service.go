@@ -8,7 +8,7 @@ import (
 )
 
 type IPlayerService interface {
-	GetList(ctx context.Context) ([]models.Player, error)
+	GetList(ctx context.Context, form models.PlayerForm) ([]models.PlayerResponse, error)
 }
 
 type PlayerService struct {
@@ -21,6 +21,6 @@ func NewPlayerService(playerRepo repository.IPlayerRepo) IPlayerService {
 	}
 }
 
-func (s *PlayerService) GetList(ctx context.Context) ([]models.Player, error) {
-	return s.PlayerRepo.GetList(ctx)
+func (s *PlayerService) GetList(ctx context.Context, form models.PlayerForm) ([]models.PlayerResponse, error) {
+	return s.PlayerRepo.GetList(ctx, form)
 }

@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/erhemdiputra/go-di/controller"
+	"github.com/erhemdiputra/go-di/models"
 	"github.com/erhemdiputra/go-di/repository"
 	"github.com/erhemdiputra/go-di/service"
 )
@@ -29,10 +30,21 @@ func (h *PlayerHandler) Serve() {
 }
 
 func (h *PlayerHandler) GetList(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	if r.Method != http.MethodGet {
+	if r.Method != http.MethodPost {
 		return nil, errors.New("Invalid Request")
 	}
 
 	ctx := r.Context()
-	return h.PlayerController.GetList(ctx)
+
+	var form models.PlayerForm
+	if err := GetJSONParams(r, &form); err != nil {
+		return nil, errors.New("Invalid JSON Params")
+	}
+
+	list, err := h.PlayerController.GetList(ctx, form)
+	if err != nil {
+		return nil, errors.New("Internal Server Error")
+	}
+
+	return list, nil
 }

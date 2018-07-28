@@ -4,12 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 
 	"github.com/erhemdiputra/go-di/models"
 )
 
 type IPlayerRepo interface {
-	GetList(ctx context.Context) ([]models.Player, error)
+	GetList(ctx context.Context, form models.PlayerForm) ([]models.PlayerResponse, error)
 }
 
 type PlayerRepo struct {
@@ -22,8 +23,9 @@ func NewPlayerRepo(db *sql.DB) IPlayerRepo {
 	}
 }
 
-func (repo *PlayerRepo) GetList(ctx context.Context) ([]models.Player, error) {
-	query := `SELECT * FROM players`
+func (repo *PlayerRepo) GetList(ctx context.Context, form models.PlayerForm) ([]models.PlayerResponse, error) {
+	query := repo.BuildQueryPlayerList(form)
+	log.Printf("[PlayerRepo] -> Get List Query : %s\n", query)
 
 	rows, err := repo.DB.QueryContext(ctx, query)
 	if err != nil {
@@ -31,10 +33,10 @@ func (repo *PlayerRepo) GetList(ctx context.Context) ([]models.Player, error) {
 	}
 	defer rows.Close()
 
-	playerList := []models.Player{}
+	playerList := []models.PlayerResponse{}
 
 	for rows.Next() {
-		var player models.Player
+		var player models.PlayerResponse
 
 		err = rows.Scan(&player.ID, &player.FullName, &player.Club)
 		if err != nil {
