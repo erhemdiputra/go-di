@@ -6,7 +6,7 @@ import (
 	"github.com/erhemdiputra/go-di/models"
 )
 
-func (repo *PlayerRepo) BuildQueryPlayerList(form models.PlayerForm) string {
+func (repo *PlayerRepo) BuildQueryGetList(form models.PlayerForm) string {
 	query := `SELECT id, full_name, club FROM players`
 
 	if form == (models.PlayerForm{}) {

@@ -20,3 +20,7 @@ func NewPlayerController(PlayerService service.IPlayerService) *PlayerController
 func (c *PlayerController) GetList(ctx context.Context, form models.PlayerForm) ([]models.PlayerResponse, error) {
 	return c.PlayerService.GetList(ctx, form)
 }
+
+func (c *PlayerController) Add(ctx context.Context, form models.PlayerForm) (int64, error) {
+	return c.PlayerService.Add(ctx, form)
+}

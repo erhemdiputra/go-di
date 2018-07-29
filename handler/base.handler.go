@@ -13,6 +13,10 @@ type Response struct {
 	Data interface{} `json:"data"`
 }
 
+type ResponseStatus struct {
+	IsSuccess int `json:"is_success"`
+}
+
 type HandlerFunc func(w http.ResponseWriter, r *http.Request) (interface{}, error)
 
 func (fn HandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {

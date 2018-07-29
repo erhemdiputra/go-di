@@ -11,6 +11,7 @@ import (
 
 type IPlayerRepo interface {
 	GetList(ctx context.Context, form models.PlayerForm) ([]models.PlayerResponse, error)
+	Add(ctx context.Context, form models.PlayerForm) (int64, error)
 }
 
 type PlayerRepo struct {
@@ -24,7 +25,7 @@ func NewPlayerRepo(db *sql.DB) IPlayerRepo {
 }
 
 func (repo *PlayerRepo) GetList(ctx context.Context, form models.PlayerForm) ([]models.PlayerResponse, error) {
-	query := repo.BuildQueryPlayerList(form)
+	query := repo.BuildQueryGetList(form)
 	log.Printf("[PlayerRepo] -> Get List Query : %s\n", query)
 
 	rows, err := repo.DB.QueryContext(ctx, query)
@@ -47,4 +48,16 @@ func (repo *PlayerRepo) GetList(ctx context.Context, form models.PlayerForm) ([]
 	}
 
 	return playerList, nil
+}
+
+func (repo *PlayerRepo) Add(ctx context.Context, form models.PlayerForm) (int64, error) {
+	query := `INSERT INTO players(full_name, club) VALUES (?, ?)`
+	log.Printf("[PlayerRepo] -> Insert : %s\n", query)
+
+	res, err := repo.DB.ExecContext(ctx, query, form.FullName, form.Club)
+	if err != nil {
+		return 0, fmt.Errorf("database insert player error : {%+v}", err)
+	}
+
+	return res.LastInsertId()
 }
