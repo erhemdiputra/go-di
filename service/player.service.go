@@ -10,6 +10,7 @@ import (
 type IPlayerService interface {
 	GetList(ctx context.Context, form models.PlayerForm) ([]models.PlayerResponse, error)
 	Add(ctx context.Context, form models.PlayerForm) (int64, error)
+	GetByID(ctx context.Context, id int64) (*models.PlayerResponse, error)
 }
 
 type PlayerService struct {
@@ -28,4 +29,8 @@ func (s *PlayerService) GetList(ctx context.Context, form models.PlayerForm) ([]
 
 func (s *PlayerService) Add(ctx context.Context, form models.PlayerForm) (int64, error) {
 	return s.PlayerRepo.Add(ctx, form)
+}
+
+func (s *PlayerService) GetByID(ctx context.Context, id int64) (*models.PlayerResponse, error) {
+	return s.PlayerRepo.GetByID(ctx, id)
 }

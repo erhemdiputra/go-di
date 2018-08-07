@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/erhemdiputra/go-di/controller"
 	"github.com/erhemdiputra/go-di/models"
@@ -28,6 +29,7 @@ func NewPlayerHandler(db *sql.DB) *PlayerHandler {
 func (h *PlayerHandler) Serve() {
 	http.Handle("/api/player/list", HandlerFunc(h.GetList))
 	http.Handle("/api/player/add", HandlerFunc(h.Add))
+	http.Handle("/api/player/", HandlerFunc(h.GetByID))
 }
 
 func (h *PlayerHandler) GetList(w http.ResponseWriter, r *http.Request) (interface{}, error) {
@@ -63,8 +65,6 @@ func (h *PlayerHandler) Add(w http.ResponseWriter, r *http.Request) (interface{}
 		return nil, errors.New("Invalid JSON Params")
 	}
 
-	form.Sanitize()
-
 	_, err = h.PlayerController.Add(ctx, form)
 	if err != nil {
 		return nil, errors.New("Internal Server Error")
@@ -75,4 +75,25 @@ func (h *PlayerHandler) Add(w http.ResponseWriter, r *http.Request) (interface{}
 	}
 
 	return resp, nil
+}
+
+func (h *PlayerHandler) GetByID(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+	if r.Method != http.MethodGet {
+		return nil, errors.New("Invalid Request")
+	}
+
+	ctx := r.Context()
+	strID := r.URL.Path[len("/api/player/"):]
+
+	id, err := strconv.ParseInt(strID, 10, 64)
+	if err != nil {
+		return nil, errors.New("Invalid player ID")
+	}
+
+	player, err := h.PlayerController.GetByID(ctx, id)
+	if err != nil {
+		return nil, errors.New("Internal Server Error")
+	}
+
+	return player, nil
 }

@@ -12,6 +12,7 @@ import (
 type IPlayerRepo interface {
 	GetList(ctx context.Context, form models.PlayerForm) ([]models.PlayerResponse, error)
 	Add(ctx context.Context, form models.PlayerForm) (int64, error)
+	GetByID(ctx context.Context, id int64) (*models.PlayerResponse, error)
 }
 
 type PlayerRepo struct {
@@ -60,4 +61,21 @@ func (repo *PlayerRepo) Add(ctx context.Context, form models.PlayerForm) (int64,
 	}
 
 	return res.LastInsertId()
+}
+
+func (repo *PlayerRepo) GetByID(ctx context.Context, id int64) (*models.PlayerResponse, error) {
+	query := `SELECT id, full_name, club FROM players WHERE id = ?`
+	log.Printf("[PlayerRepo] -> GetByID : %s\n", query)
+
+	var player models.PlayerResponse
+
+	err := repo.DB.QueryRowContext(ctx, query, id).Scan(&player.ID, &player.FullName, &player.Club)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
+		return nil, fmt.Errorf("database query player by id error : {%+v}", err)
+	}
+
+	return &player, nil
 }
