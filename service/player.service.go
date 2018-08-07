@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	infraMemCache "github.com/erhemdiputra/go-di/infrastructure_services/memcache"
 	"github.com/erhemdiputra/go-di/models"
 	"github.com/erhemdiputra/go-di/repository"
 )
@@ -16,26 +17,69 @@ type IPlayerService interface {
 
 type PlayerService struct {
 	PlayerRepo repository.IPlayerRepo
+	MemCache   infraMemCache.IMemCache
 }
 
-func NewPlayerService(playerRepo repository.IPlayerRepo) IPlayerService {
+func NewPlayerService(playerRepo repository.IPlayerRepo, memCache infraMemCache.IMemCache) IPlayerService {
 	return &PlayerService{
 		PlayerRepo: playerRepo,
+		MemCache:   memCache,
 	}
 }
 
 func (s *PlayerService) GetList(ctx context.Context, form models.PlayerForm) ([]models.Player, error) {
-	return s.PlayerRepo.GetList(ctx, form)
+	var playerList []models.Player
+
+	_ = s.MemCache.GetCacheTTLJSON(infraMemCache.Key15Min, models.KeyCachePlayerList, &playerList)
+
+	if len(playerList) > 0 {
+		return playerList, nil
+	}
+
+	playerList, err := s.PlayerRepo.GetList(ctx, form)
+	if err != nil {
+		return nil, err
+	}
+
+	_ = s.MemCache.SetCacheTTLJSON(infraMemCache.Key15Min, models.KeyCachePlayerList, playerList)
+
+	return playerList, nil
 }
 
 func (s *PlayerService) Add(ctx context.Context, form models.PlayerForm) (int64, error) {
-	return s.PlayerRepo.Add(ctx, form)
+	id, err := s.PlayerRepo.Add(ctx, form)
+	if err != nil {
+		return 0, err
+	}
+
+	if err := s.MemCache.DeleteCache(infraMemCache.Key15Min, models.KeyCachePlayerList); err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }
 
 func (s *PlayerService) GetByID(ctx context.Context, id int64) (*models.Player, error) {
+	var playerList []models.Player
+
+	_ = s.MemCache.GetCacheTTLJSON(infraMemCache.Key15Min, models.KeyCachePlayerList, &playerList)
+
+	if len(playerList) > 0 {
+		return &playerList[0], nil
+	}
+
 	return s.PlayerRepo.GetByID(ctx, id)
 }
 
 func (s *PlayerService) Update(ctx context.Context, id int64, form models.PlayerForm) (int64, error) {
-	return s.PlayerRepo.Update(ctx, id, form)
+	id, err := s.PlayerRepo.Update(ctx, id, form)
+	if err != nil {
+		return 0, err
+	}
+
+	if err := s.MemCache.DeleteCache(infraMemCache.Key15Min, models.KeyCachePlayerList); err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }

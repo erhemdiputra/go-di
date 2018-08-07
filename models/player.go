@@ -2,6 +2,10 @@ package models
 
 import "html"
 
+const (
+	KeyCachePlayerList = "player_list"
+)
+
 type PlayerForm struct {
 	FullName string `json:"full_name,omitempty"`
 	Club     string `json:"club,omitempty"`

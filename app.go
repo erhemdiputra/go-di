@@ -8,6 +8,7 @@ import (
 	"github.com/erhemdiputra/go-di/config"
 	"github.com/erhemdiputra/go-di/database"
 	"github.com/erhemdiputra/go-di/handler"
+	infraMemCache "github.com/erhemdiputra/go-di/infrastructure_services/memcache"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -24,7 +25,9 @@ func main() {
 	}
 	defer database.Get().Close()
 
-	playerHandler := handler.NewPlayerHandler(database.Get())
+	infraMemCache.InitKodingCache()
+
+	playerHandler := handler.NewPlayerHandler(database.Get(), infraMemCache.GetKodingCache())
 	playerHandler.Serve()
 
 	port := globalCfg.Server.Port

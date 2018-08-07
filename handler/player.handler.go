@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	infraMemCache "github.com/erhemdiputra/go-di/infrastructure_services/memcache"
 	"github.com/erhemdiputra/go-di/models"
 	"github.com/erhemdiputra/go-di/repository"
 	"github.com/erhemdiputra/go-di/service"
@@ -15,9 +16,9 @@ type PlayerHandler struct {
 	PlayerService service.IPlayerService
 }
 
-func NewPlayerHandler(db *sql.DB) *PlayerHandler {
+func NewPlayerHandler(db *sql.DB, memCache *infraMemCache.KodingCache) *PlayerHandler {
 	playerRepo := repository.NewPlayerRepo(db)
-	playerService := service.NewPlayerService(playerRepo)
+	playerService := service.NewPlayerService(playerRepo, memCache)
 
 	return &PlayerHandler{
 		PlayerService: playerService,

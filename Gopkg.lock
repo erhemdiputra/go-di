@@ -8,10 +8,16 @@
   version = "v1.4.0"
 
 [[projects]]
-  name = "github.com/julienschmidt/httprouter"
+  branch = "master"
+  name = "github.com/koding/cache"
   packages = ["."]
-  revision = "8c199fb6259ffc1af525cc3ad52ee60ba8359669"
-  version = "v1.1"
+  revision = "e8a81b0b3f20f895153311abde1062894b5912d6"
+
+[[projects]]
+  name = "google.golang.org/appengine"
+  packages = ["cloudsql"]
+  revision = "b1f26356af11148e710935ed1ac8a7f5702c7612"
+  version = "v1.1.0"
 
 [[projects]]
   name = "gopkg.in/gcfg.v1"
@@ -25,6 +31,18 @@
   version = "v1.2.3"
 
 [[projects]]
+  branch = "v2"
+  name = "gopkg.in/mgo.v2"
+  packages = [
+    ".",
+    "bson",
+    "internal/json",
+    "internal/sasl",
+    "internal/scram"
+  ]
+  revision = "9856a29383ce1c59f308dd1cf0363a79b5bef6b5"
+
+[[projects]]
   name = "gopkg.in/warnings.v0"
   packages = ["."]
   revision = "ec4a0fea49c7b46c2aeb0b51aac55779c607e52b"
@@ -33,6 +51,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3996947bbfcbaa9b08a30650ae68b9c53103dd69a7f9a364a59e169393af868e"
+  inputs-digest = "a7c8f05dbcbbf5e41992e6f25f81ab79a28a4451e1d9c91c255cab302cffc846"
   solver-name = "gps-cdcl"
   solver-version = 1
