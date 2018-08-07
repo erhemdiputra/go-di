@@ -10,9 +10,10 @@ import (
 )
 
 type IPlayerRepo interface {
-	GetList(ctx context.Context, form models.PlayerForm) ([]models.PlayerResponse, error)
+	GetList(ctx context.Context, form models.PlayerForm) ([]models.Player, error)
 	Add(ctx context.Context, form models.PlayerForm) (int64, error)
-	GetByID(ctx context.Context, id int64) (*models.PlayerResponse, error)
+	GetByID(ctx context.Context, id int64) (*models.Player, error)
+	Update(ctx context.Context, id int64, form models.PlayerForm) (int64, error)
 }
 
 type PlayerRepo struct {
@@ -25,7 +26,7 @@ func NewPlayerRepo(db *sql.DB) IPlayerRepo {
 	}
 }
 
-func (repo *PlayerRepo) GetList(ctx context.Context, form models.PlayerForm) ([]models.PlayerResponse, error) {
+func (repo *PlayerRepo) GetList(ctx context.Context, form models.PlayerForm) ([]models.Player, error) {
 	query := repo.BuildQueryGetList(form)
 	log.Printf("[PlayerRepo] -> Get List Query : %s\n", query)
 
@@ -35,10 +36,10 @@ func (repo *PlayerRepo) GetList(ctx context.Context, form models.PlayerForm) ([]
 	}
 	defer rows.Close()
 
-	playerList := []models.PlayerResponse{}
+	playerList := []models.Player{}
 
 	for rows.Next() {
-		var player models.PlayerResponse
+		var player models.Player
 
 		err = rows.Scan(&player.ID, &player.FullName, &player.Club)
 		if err != nil {
@@ -63,11 +64,11 @@ func (repo *PlayerRepo) Add(ctx context.Context, form models.PlayerForm) (int64,
 	return res.LastInsertId()
 }
 
-func (repo *PlayerRepo) GetByID(ctx context.Context, id int64) (*models.PlayerResponse, error) {
+func (repo *PlayerRepo) GetByID(ctx context.Context, id int64) (*models.Player, error) {
 	query := `SELECT id, full_name, club FROM players WHERE id = ?`
 	log.Printf("[PlayerRepo] -> GetByID : %s\n", query)
 
-	var player models.PlayerResponse
+	var player models.Player
 
 	err := repo.DB.QueryRowContext(ctx, query, id).Scan(&player.ID, &player.FullName, &player.Club)
 	if err != nil {
@@ -78,4 +79,16 @@ func (repo *PlayerRepo) GetByID(ctx context.Context, id int64) (*models.PlayerRe
 	}
 
 	return &player, nil
+}
+
+func (repo *PlayerRepo) Update(ctx context.Context, id int64, form models.PlayerForm) (int64, error) {
+	query := `UPDATE players SET full_name = ?, club = ? WHERE id = ?`
+	log.Printf("[PlayerRepo] -> Update : %s\n", query)
+
+	res, err := repo.DB.ExecContext(ctx, query, form.FullName, form.Club, id)
+	if err != nil {
+		return 0, fmt.Errorf("database update player error : {%+v}", err)
+	}
+
+	return res.RowsAffected()
 }

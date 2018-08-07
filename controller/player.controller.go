@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"errors"
 
 	"github.com/erhemdiputra/go-di/models"
 	"github.com/erhemdiputra/go-di/service"
@@ -18,18 +17,18 @@ func NewPlayerController(PlayerService service.IPlayerService) *PlayerController
 	}
 }
 
-func (c *PlayerController) GetList(ctx context.Context, form models.PlayerForm) ([]models.PlayerResponse, error) {
+func (c *PlayerController) GetList(ctx context.Context, form models.PlayerForm) ([]models.Player, error) {
 	return c.PlayerService.GetList(ctx, form)
 }
 
 func (c *PlayerController) Add(ctx context.Context, form models.PlayerForm) (int64, error) {
-	form.Sanitize()
 	return c.PlayerService.Add(ctx, form)
 }
 
-func (c *PlayerController) GetByID(ctx context.Context, id int64) (*models.PlayerResponse, error) {
-	if id <= 0 {
-		return nil, errors.New("Invalid Player ID")
-	}
+func (c *PlayerController) GetByID(ctx context.Context, id int64) (*models.Player, error) {
 	return c.PlayerService.GetByID(ctx, id)
+}
+
+func (c *PlayerController) Update(ctx context.Context, id int64, form models.PlayerForm) (int64, error) {
+	return c.PlayerService.Update(ctx, id, form)
 }
