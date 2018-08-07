@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 
 	"github.com/erhemdiputra/go-di/models"
 )
@@ -28,7 +27,6 @@ func NewPlayerRepo(db *sql.DB) IPlayerRepo {
 
 func (repo *PlayerRepo) GetList(ctx context.Context, form models.PlayerForm) ([]models.Player, error) {
 	query := repo.BuildQueryGetList(form)
-	log.Printf("[PlayerRepo] -> Get List Query : %s\n", query)
 
 	rows, err := repo.DB.QueryContext(ctx, query)
 	if err != nil {
@@ -54,7 +52,6 @@ func (repo *PlayerRepo) GetList(ctx context.Context, form models.PlayerForm) ([]
 
 func (repo *PlayerRepo) Add(ctx context.Context, form models.PlayerForm) (int64, error) {
 	query := `INSERT INTO players(full_name, club) VALUES (?, ?)`
-	log.Printf("[PlayerRepo] -> Insert : %s\n", query)
 
 	res, err := repo.DB.ExecContext(ctx, query, form.FullName, form.Club)
 	if err != nil {
@@ -66,7 +63,6 @@ func (repo *PlayerRepo) Add(ctx context.Context, form models.PlayerForm) (int64,
 
 func (repo *PlayerRepo) GetByID(ctx context.Context, id int64) (*models.Player, error) {
 	query := `SELECT id, full_name, club FROM players WHERE id = ?`
-	log.Printf("[PlayerRepo] -> GetByID : %s\n", query)
 
 	var player models.Player
 
@@ -83,7 +79,6 @@ func (repo *PlayerRepo) GetByID(ctx context.Context, id int64) (*models.Player, 
 
 func (repo *PlayerRepo) Update(ctx context.Context, id int64, form models.PlayerForm) (int64, error) {
 	query := `UPDATE players SET full_name = ?, club = ? WHERE id = ?`
-	log.Printf("[PlayerRepo] -> Update : %s\n", query)
 
 	res, err := repo.DB.ExecContext(ctx, query, form.FullName, form.Club, id)
 	if err != nil {

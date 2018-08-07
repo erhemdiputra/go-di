@@ -6,23 +6,21 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/erhemdiputra/go-di/controller"
 	"github.com/erhemdiputra/go-di/models"
 	"github.com/erhemdiputra/go-di/repository"
 	"github.com/erhemdiputra/go-di/service"
 )
 
 type PlayerHandler struct {
-	PlayerController *controller.PlayerController
+	PlayerService service.IPlayerService
 }
 
 func NewPlayerHandler(db *sql.DB) *PlayerHandler {
 	playerRepo := repository.NewPlayerRepo(db)
 	playerService := service.NewPlayerService(playerRepo)
-	playerController := controller.NewPlayerController(playerService)
 
 	return &PlayerHandler{
-		PlayerController: playerController,
+		PlayerService: playerService,
 	}
 }
 
@@ -45,7 +43,7 @@ func (h *PlayerHandler) GetList(w http.ResponseWriter, r *http.Request) (interfa
 		return nil, errors.New("Invalid JSON Params")
 	}
 
-	list, err := h.PlayerController.GetList(ctx, form)
+	list, err := h.PlayerService.GetList(ctx, form)
 	if err != nil {
 		return nil, errors.New("Internal Server Error")
 	}
@@ -68,7 +66,7 @@ func (h *PlayerHandler) Add(w http.ResponseWriter, r *http.Request) (interface{}
 
 	form.Sanitize()
 
-	_, err = h.PlayerController.Add(ctx, form)
+	_, err = h.PlayerService.Add(ctx, form)
 	if err != nil {
 		return nil, errors.New("Internal Server Error")
 	}
@@ -93,7 +91,7 @@ func (h *PlayerHandler) GetByID(w http.ResponseWriter, r *http.Request) (interfa
 		return nil, errors.New("Invalid player ID")
 	}
 
-	player, err := h.PlayerController.GetByID(ctx, id)
+	player, err := h.PlayerService.GetByID(ctx, id)
 	if err != nil {
 		return nil, errors.New("Internal Server Error")
 	}
@@ -120,7 +118,7 @@ func (h *PlayerHandler) Update(w http.ResponseWriter, r *http.Request) (interfac
 		return nil, errors.New("Invalid JSON Params")
 	}
 
-	_, err = h.PlayerController.Update(ctx, id, form)
+	_, err = h.PlayerService.Update(ctx, id, form)
 	if err != nil {
 		return nil, errors.New("Internal Server Error")
 	}
