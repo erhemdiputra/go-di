@@ -10,33 +10,32 @@ import (
 	"github.com/erhemdiputra/go-di/models"
 	"github.com/erhemdiputra/go-di/repository"
 	"github.com/erhemdiputra/go-di/service"
+	"github.com/gorilla/mux"
 )
 
 type PlayerHandler struct {
+	Router        *mux.Router
 	PlayerService service.IPlayerService
 }
 
-func NewPlayerHandler(db *sql.DB, memCache *infraMemCache.KodingCache) *PlayerHandler {
+func NewPlayerHandler(router *mux.Router, db *sql.DB, memCache *infraMemCache.KodingCache) *PlayerHandler {
 	playerRepo := repository.NewPlayerRepo(db)
 	playerService := service.NewPlayerService(playerRepo, memCache)
 
 	return &PlayerHandler{
+		Router:        router,
 		PlayerService: playerService,
 	}
 }
 
 func (h *PlayerHandler) Serve() {
-	http.Handle("/api/player/list", HandlerFunc(h.GetList))
-	http.Handle("/api/player/add", HandlerFunc(h.Add))
-	http.Handle("/api/player/", HandlerFunc(h.GetByID))
-	http.Handle("/api/player/update/", HandlerFunc(h.Update))
+	h.Router.Handle("/api/player/list", HandlerFunc(h.GetList)).Methods("POST")
+	h.Router.Handle("/api/player/add", HandlerFunc(h.Add)).Methods("POST")
+	h.Router.Handle("/api/player/{id:[0-9]+}", HandlerFunc(h.GetByID)).Methods("GET")
+	h.Router.Handle("/api/player/update/{id:[0-9]+}", HandlerFunc(h.Update)).Methods("POST")
 }
 
 func (h *PlayerHandler) GetList(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	if r.Method != http.MethodPost {
-		return nil, errors.New("Invalid Request")
-	}
-
 	ctx := r.Context()
 
 	var form models.PlayerForm
@@ -53,10 +52,6 @@ func (h *PlayerHandler) GetList(w http.ResponseWriter, r *http.Request) (interfa
 }
 
 func (h *PlayerHandler) Add(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	if r.Method != http.MethodPost {
-		return nil, errors.New("Invalid Request")
-	}
-
 	ctx := r.Context()
 
 	var form models.PlayerForm
@@ -80,14 +75,10 @@ func (h *PlayerHandler) Add(w http.ResponseWriter, r *http.Request) (interface{}
 }
 
 func (h *PlayerHandler) GetByID(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	if r.Method != http.MethodGet {
-		return nil, errors.New("Invalid Request")
-	}
-
 	ctx := r.Context()
-	strID := r.URL.Path[len("/api/player/"):]
+	vars := mux.Vars(r)
 
-	id, err := strconv.ParseInt(strID, 10, 64)
+	id, err := strconv.ParseInt(vars["id"], 10, 64)
 	if err != nil || id <= 0 {
 		return nil, errors.New("Invalid player ID")
 	}
@@ -101,14 +92,10 @@ func (h *PlayerHandler) GetByID(w http.ResponseWriter, r *http.Request) (interfa
 }
 
 func (h *PlayerHandler) Update(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	if r.Method != http.MethodPost {
-		return nil, errors.New("Invalid Request")
-	}
-
 	ctx := r.Context()
-	strID := r.URL.Path[len("/api/player/update/"):]
+	vars := mux.Vars(r)
 
-	id, err := strconv.ParseInt(strID, 10, 64)
+	id, err := strconv.ParseInt(vars["id"], 10, 64)
 	if err != nil || id <= 0 {
 		return nil, errors.New("Invalid Player ID")
 	}

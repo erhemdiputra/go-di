@@ -10,6 +10,7 @@ import (
 	"github.com/erhemdiputra/go-di/handler"
 	infraMemCache "github.com/erhemdiputra/go-di/infrastructure_services/memcache"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -26,9 +27,12 @@ func main() {
 	defer database.Get().Close()
 
 	infraMemCache.InitKodingCache()
+	router := mux.NewRouter()
 
-	playerHandler := handler.NewPlayerHandler(database.Get(), infraMemCache.GetKodingCache())
+	playerHandler := handler.NewPlayerHandler(router, database.Get(), infraMemCache.GetKodingCache())
 	playerHandler.Serve()
+
+	http.Handle("/", router)
 
 	port := globalCfg.Server.Port
 	log.Printf("Listening on Port %d\n", port)
