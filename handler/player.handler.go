@@ -14,25 +14,23 @@ import (
 )
 
 type PlayerHandler struct {
-	Router        *mux.Router
 	PlayerService service.IPlayerService
 }
 
-func NewPlayerHandler(router *mux.Router, db *sql.DB, memCache *infraMemCache.KodingCache) *PlayerHandler {
+func NewPlayerHandler(db *sql.DB, memCache *infraMemCache.KodingCache) *PlayerHandler {
 	playerRepo := repository.NewPlayerRepo(db)
 	playerService := service.NewPlayerService(playerRepo, memCache)
 
 	return &PlayerHandler{
-		Router:        router,
 		PlayerService: playerService,
 	}
 }
 
-func (h *PlayerHandler) Serve() {
-	h.Router.Handle("/api/player/list", HandlerFunc(h.GetList)).Methods("POST")
-	h.Router.Handle("/api/player/add", HandlerFunc(h.Add)).Methods("POST")
-	h.Router.Handle("/api/player/{id:[0-9]+}", HandlerFunc(h.GetByID)).Methods("GET")
-	h.Router.Handle("/api/player/update/{id:[0-9]+}", HandlerFunc(h.Update)).Methods("POST")
+func (h *PlayerHandler) Serve(router *mux.Router) {
+	router.Handle("/api/player/list", HandlerFunc(h.GetList)).Methods("POST")
+	router.Handle("/api/player/add", HandlerFunc(h.Add)).Methods("POST")
+	router.Handle("/api/player/{id:[0-9]+}", HandlerFunc(h.GetByID)).Methods("GET")
+	router.Handle("/api/player/update/{id:[0-9]+}", HandlerFunc(h.Update)).Methods("POST")
 }
 
 func (h *PlayerHandler) GetList(w http.ResponseWriter, r *http.Request) (interface{}, error) {
