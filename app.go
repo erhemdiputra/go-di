@@ -9,6 +9,7 @@ import (
 	"github.com/erhemdiputra/go-di/database"
 	"github.com/erhemdiputra/go-di/handler"
 	infraMemCache "github.com/erhemdiputra/go-di/infrastructure_services/memcache"
+	"github.com/erhemdiputra/go-di/views"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 )
@@ -26,10 +27,12 @@ func main() {
 	}
 	defer database.Get().Close()
 
+	views.PopulateTemplate()
 	infraMemCache.InitKodingCache()
 	router := mux.NewRouter()
 
 	handler.NewPlayerHandler(router, database.Get(), infraMemCache.GetKodingCache())
+	handler.NewUserHandler(router)
 
 	http.Handle("/", router)
 
