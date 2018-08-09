@@ -29,8 +29,7 @@ func main() {
 	infraMemCache.InitKodingCache()
 	router := mux.NewRouter()
 
-	playerHandler := handler.NewPlayerHandler(database.Get(), infraMemCache.GetKodingCache())
-	playerHandler.Serve(router)
+	handler.NewPlayerHandler(router, database.Get(), infraMemCache.GetKodingCache())
 
 	http.Handle("/", router)
 
