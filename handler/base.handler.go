@@ -3,47 +3,75 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/erhemdiputra/go-di/config"
+	"github.com/julienschmidt/httprouter"
 )
 
 type Response struct {
-	Data interface{} `json:"data"`
+	Status            string      `json:"status"`
+	ServerProcessTime string      `json:"server_process_time"`
+	Data              interface{} `json:"data"`
+	MessageError      []string    `json:"message_error,omitempty"`
 }
 
 type ResponseStatus struct {
 	IsSuccess int `json:"is_success"`
 }
 
-type HandlerFunc func(w http.ResponseWriter, r *http.Request) (interface{}, error)
+func wrapHandler(fn httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		ctx := r.Context()
 
-func (fn HandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+		timeout, err := time.ParseDuration(config.Get().Server.Timeout)
+		if err != nil {
+			timeout = 5 * time.Second
+		}
 
-	timeout, err := time.ParseDuration(config.Get().Server.Timeout)
-	if err != nil {
-		timeout = time.Second * 5
+		ctx, cancel := context.WithTimeout(ctx, timeout)
+		defer cancel()
+
+		r = r.WithContext(ctx)
+		fn(w, r, ps)
 	}
+}
 
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-
-	r = r.WithContext(ctx)
-
-	res, err := fn(w, r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	resp := Response{
-		Data: res,
-	}
-
-	bytesResp, _ := json.Marshal(resp)
-
+func writeJSONResponse(w http.ResponseWriter, statusCode int, resp Response) {
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(bytesResp)
+	w.WriteHeader(statusCode)
+
+	encoded, err := json.Marshal(resp)
+	if err != nil {
+		log.Println(err)
+	}
+
+	w.Write(encoded)
+	return
+}
+
+func writeSuccess(w http.ResponseWriter, processTime float64, data interface{}) {
+	resp := Response{
+		Status:            http.StatusText(http.StatusOK),
+		ServerProcessTime: fmt.Sprintf("%f", processTime),
+		Data:              data,
+	}
+
+	writeJSONResponse(w, http.StatusOK, resp)
+	return
+}
+
+func writeError(w http.ResponseWriter, processTime float64, message ...string) {
+	resp := Response{
+		Status:            http.StatusText(http.StatusOK),
+		ServerProcessTime: fmt.Sprintf("%f", processTime),
+		MessageError:      message,
+		Data:              ResponseStatus{},
+	}
+
+	writeJSONResponse(w, http.StatusOK, resp)
+	return
 }

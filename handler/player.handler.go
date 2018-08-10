@@ -2,22 +2,22 @@ package handler
 
 import (
 	"database/sql"
-	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	infraMemCache "github.com/erhemdiputra/go-di/infrastructure_services/memcache"
 	"github.com/erhemdiputra/go-di/models"
 	"github.com/erhemdiputra/go-di/repository"
 	"github.com/erhemdiputra/go-di/service"
-	"github.com/gorilla/mux"
+	"github.com/julienschmidt/httprouter"
 )
 
 type PlayerHandler struct {
 	PlayerService service.IPlayerService
 }
 
-func NewPlayerHandler(router *mux.Router, db *sql.DB, memCache *infraMemCache.KodingCache) {
+func NewPlayerHandler(router *httprouter.Router, db *sql.DB, memCache *infraMemCache.KodingCache) {
 	playerRepo := repository.NewPlayerRepo(db)
 	playerService := service.NewPlayerService(playerRepo, memCache)
 
@@ -25,91 +25,104 @@ func NewPlayerHandler(router *mux.Router, db *sql.DB, memCache *infraMemCache.Ko
 		PlayerService: playerService,
 	}
 
-	router.Handle("/api/player/list", HandlerFunc(handler.GetList)).Methods("POST")
-	router.Handle("/api/player/add", HandlerFunc(handler.Add)).Methods("POST")
-	router.Handle("/api/player/{id:[0-9]+}", HandlerFunc(handler.GetByID)).Methods("GET")
-	router.Handle("/api/player/update/{id:[0-9]+}", HandlerFunc(handler.Update)).Methods("POST")
+	router.POST("/api/player/list", wrapHandler(handler.GetList))
+	router.POST("/api/player/add", wrapHandler(handler.Add))
+	router.GET("/api/player/:id", wrapHandler(handler.GetByID))
+	router.POST("/api/player/update/:id", wrapHandler(handler.Update))
 }
 
-func (h *PlayerHandler) GetList(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+func (h *PlayerHandler) GetList(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	start := time.Now()
 	ctx := r.Context()
 
 	var form models.PlayerForm
 	if err := GetJSONParams(r, &form); err != nil {
-		return nil, errors.New("Invalid JSON Params")
+		writeError(w, time.Since(start).Seconds(), "Invalid JSON Params")
+		return
 	}
 
 	list, err := h.PlayerService.GetList(ctx, form)
 	if err != nil {
-		return nil, errors.New("Internal Server Error")
+		writeError(w, time.Since(start).Seconds(), "Internal Server Error")
+		return
 	}
 
-	return list, nil
+	writeSuccess(w, time.Since(start).Seconds(), list)
 }
 
-func (h *PlayerHandler) Add(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+func (h *PlayerHandler) Add(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	start := time.Now()
 	ctx := r.Context()
 
 	var form models.PlayerForm
 	err := GetJSONParams(r, &form)
 	if err != nil || form.IsEmpty() {
-		return nil, errors.New("Invalid JSON Params")
+		writeError(w, time.Since(start).Seconds(), "Invalid JSON Params")
+		return
 	}
 
 	form.Sanitize()
 
 	_, err = h.PlayerService.Add(ctx, form)
 	if err != nil {
-		return nil, errors.New("Internal Server Error")
+		writeError(w, time.Since(start).Seconds(), "Internal Server Error")
+		return
 	}
 
 	resp := ResponseStatus{
 		IsSuccess: 1,
 	}
 
-	return resp, nil
+	writeSuccess(w, time.Since(start).Seconds(), resp)
 }
 
-func (h *PlayerHandler) GetByID(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+func (h *PlayerHandler) GetByID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	start := time.Now()
 	ctx := r.Context()
-	vars := mux.Vars(r)
+	idStr := ps.ByName("id")
 
-	id, err := strconv.ParseInt(vars["id"], 10, 64)
+	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil || id <= 0 {
-		return nil, errors.New("Invalid player ID")
+		writeError(w, time.Since(start).Seconds(), "Invalid Player ID")
+		return
 	}
 
 	player, err := h.PlayerService.GetByID(ctx, id)
 	if err != nil {
-		return nil, errors.New("Internal Server Error")
+		writeError(w, time.Since(start).Seconds(), "Internal Server Error")
+		return
 	}
 
-	return player, nil
+	writeSuccess(w, time.Since(start).Seconds(), player)
 }
 
-func (h *PlayerHandler) Update(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+func (h *PlayerHandler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	start := time.Now()
 	ctx := r.Context()
-	vars := mux.Vars(r)
+	idStr := ps.ByName("id")
 
-	id, err := strconv.ParseInt(vars["id"], 10, 64)
+	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil || id <= 0 {
-		return nil, errors.New("Invalid Player ID")
+		writeError(w, time.Since(start).Seconds(), "Invalid Player ID")
+		return
 	}
 
 	var form models.PlayerForm
 	err = GetJSONParams(r, &form)
 	if err != nil || form.IsEmpty() {
-		return nil, errors.New("Invalid JSON Params")
+		writeError(w, time.Since(start).Seconds(), "Invalid JSON Params")
+		return
 	}
 
 	_, err = h.PlayerService.Update(ctx, id, form)
 	if err != nil {
-		return nil, errors.New("Internal Server Error")
+		writeError(w, time.Since(start).Seconds(), "Internal Server Error")
+		return
 	}
 
 	resp := ResponseStatus{
 		IsSuccess: 1,
 	}
 
-	return resp, nil
+	writeSuccess(w, time.Since(start).Seconds(), resp)
 }

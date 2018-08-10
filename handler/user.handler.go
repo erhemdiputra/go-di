@@ -3,13 +3,13 @@ package handler
 import (
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/julienschmidt/httprouter"
 )
 
 type UserHandler struct {
 }
 
-func NewUserHandler(router *mux.Router) {
+func NewUserHandler(router *httprouter.Router) {
 
 }
 

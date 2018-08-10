@@ -11,7 +11,7 @@ import (
 	infraMemCache "github.com/erhemdiputra/go-di/infrastructure_services/memcache"
 	"github.com/erhemdiputra/go-di/views"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/gorilla/mux"
+	"github.com/julienschmidt/httprouter"
 )
 
 func main() {
@@ -29,14 +29,12 @@ func main() {
 
 	views.PopulateTemplate()
 	infraMemCache.InitKodingCache()
-	router := mux.NewRouter()
+	router := httprouter.New()
 
 	handler.NewPlayerHandler(router, database.Get(), infraMemCache.GetKodingCache())
 	handler.NewUserHandler(router)
 
-	http.Handle("/", router)
-
 	port := globalCfg.Server.Port
 	log.Printf("Listening on Port %d\n", port)
-	http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+	http.ListenAndServe(fmt.Sprintf(":%d", port), router)
 }
