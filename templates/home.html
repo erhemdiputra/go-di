@@ -3,6 +3,10 @@
         <title>Home</title>
     </head>
     <body>
-        Home Page
+        <h1>Home</h1>
+        <small>User: {{.username}}</small>
+        <form method="POST" action="/logout">
+            <button type="submit">Logout</button>
+        </form>
     </body>
 </html>

@@ -11,6 +11,7 @@ import (
 	infraMemCache "github.com/erhemdiputra/go-di/infrastructure_services/memcache"
 	"github.com/erhemdiputra/go-di/views"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/securecookie"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -31,8 +32,13 @@ func main() {
 	infraMemCache.InitKodingCache()
 	router := httprouter.New()
 
+	cookieHandler := securecookie.New(
+		securecookie.GenerateRandomKey(64),
+		securecookie.GenerateRandomKey(32),
+	)
+
 	handler.NewPlayerHandler(router, database.Get(), infraMemCache.GetKodingCache())
-	handler.NewUserHandler(router)
+	handler.NewUserHandler(router, cookieHandler, views.GetMapTemplate())
 
 	port := globalCfg.Server.Port
 	log.Printf("Listening on Port %d\n", port)
