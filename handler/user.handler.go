@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"database/sql"
 	"html/template"
 	"log"
 	"net/http"
 
+	"github.com/erhemdiputra/go-di/repository"
 	"github.com/erhemdiputra/go-di/service"
 	"github.com/gorilla/securecookie"
 	"github.com/julienschmidt/httprouter"
@@ -15,10 +17,11 @@ type UserHandler struct {
 	MapTemplate map[string]*template.Template
 }
 
-func NewUserHandler(router *httprouter.Router, cookieHandler *securecookie.SecureCookie,
-	mapTemplate map[string]*template.Template) {
+func NewUserHandler(router *httprouter.Router, db *sql.DB,
+	cookieHandler *securecookie.SecureCookie, mapTemplate map[string]*template.Template) {
 
-	userService := service.NewUserService(cookieHandler)
+	userRepo := repository.NewUserRepo(db)
+	userService := service.NewUserService(cookieHandler, userRepo)
 
 	handler := UserHandler{
 		UserService: userService,
@@ -26,12 +29,18 @@ func NewUserHandler(router *httprouter.Router, cookieHandler *securecookie.Secur
 	}
 
 	router.GET("/login", handler.GetLoginPage)
-	router.POST("/login", handler.PostLoginPage)
+	router.POST("/login", wrapHandler(handler.PostLoginPage))
 	router.POST("/logout", handler.Logout)
 	router.GET("/home", handler.GetHomePage)
 }
 
 func (h *UserHandler) GetLoginPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	userName := h.UserService.GetUserName(r)
+	if userName != "" {
+		http.Redirect(w, r, "/home", http.StatusFound)
+		return
+	}
+
 	err := h.MapTemplate["login"].Execute(w, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -39,16 +48,22 @@ func (h *UserHandler) GetLoginPage(w http.ResponseWriter, r *http.Request, ps ht
 }
 
 func (h *UserHandler) PostLoginPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	name := r.FormValue("name")
+	username := r.FormValue("username")
 	password := r.FormValue("password")
 
-	if name == "" && password == "" {
+	if username == "" && password == "" {
 		http.Redirect(w, r, "/login", http.StatusFound)
 		return
 	}
 
-	// TODO : Check DB//
-	h.UserService.SetSession(name, w)
+	ctx := r.Context()
+	user, err := h.UserService.IsValidUser(ctx, username, password)
+	if err != nil {
+		http.Redirect(w, r, "/login", http.StatusFound)
+		return
+	}
+
+	h.UserService.SetSession(user.FullName, w)
 	http.Redirect(w, r, "/home", http.StatusFound)
 }
 

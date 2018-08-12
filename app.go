@@ -38,7 +38,7 @@ func main() {
 	)
 
 	handler.NewPlayerHandler(router, database.Get(), infraMemCache.GetKodingCache())
-	handler.NewUserHandler(router, cookieHandler, views.GetMapTemplate())
+	handler.NewUserHandler(router, database.Get(), cookieHandler, views.GetMapTemplate())
 
 	port := globalCfg.Server.Port
 	log.Printf("Listening on Port %d\n", port)

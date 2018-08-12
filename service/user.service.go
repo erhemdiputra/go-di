@@ -1,9 +1,11 @@
 package service
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/erhemdiputra/go-di/models"
+	"github.com/erhemdiputra/go-di/repository"
 	"github.com/gorilla/securecookie"
 )
 
@@ -11,15 +13,18 @@ type IUserService interface {
 	GetUserName(request *http.Request) string
 	SetSession(userName string, response http.ResponseWriter) error
 	ClearSession(response http.ResponseWriter)
+	IsValidUser(ctx context.Context, name string, password string) (*models.User, error)
 }
 
 type UserService struct {
 	CookieHandler *securecookie.SecureCookie
+	UserRepo      repository.IUserRepo
 }
 
-func NewUserService(cookieHandler *securecookie.SecureCookie) IUserService {
+func NewUserService(cookieHandler *securecookie.SecureCookie, userRepo repository.IUserRepo) IUserService {
 	return &UserService{
 		CookieHandler: cookieHandler,
+		UserRepo:      userRepo,
 	}
 }
 
@@ -68,4 +73,8 @@ func (s *UserService) ClearSession(response http.ResponseWriter) {
 	}
 
 	http.SetCookie(response, cookie)
+}
+
+func (s *UserService) IsValidUser(ctx context.Context, name string, password string) (*models.User, error) {
+	return s.UserRepo.IsValidUser(ctx, name, password)
 }
