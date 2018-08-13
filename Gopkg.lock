@@ -8,6 +8,18 @@
   version = "v1.4.0"
 
 [[projects]]
+  name = "github.com/gorilla/securecookie"
+  packages = ["."]
+  revision = "e59506cc896acb7f7bf732d4fdf5e25f7ccd8983"
+  version = "v1.1.1"
+
+[[projects]]
+  name = "github.com/julienschmidt/httprouter"
+  packages = ["."]
+  revision = "8c199fb6259ffc1af525cc3ad52ee60ba8359669"
+  version = "v1.1"
+
+[[projects]]
   branch = "master"
   name = "github.com/koding/cache"
   packages = ["."]
@@ -51,6 +63,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a7c8f05dbcbbf5e41992e6f25f81ab79a28a4451e1d9c91c255cab302cffc846"
+  inputs-digest = "1eac7e24bbf9ee8048c486e5de422267c0f59b12151efec3f6c6ba278a6ad9e5"
   solver-name = "gps-cdcl"
   solver-version = 1
