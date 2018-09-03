@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	infraMemCache "github.com/erhemdiputra/go-di/infrastructure_services/memcache"
 	"github.com/erhemdiputra/go-di/models"
@@ -11,7 +12,7 @@ import (
 type IPlayerService interface {
 	GetList(ctx context.Context, form models.PlayerForm) ([]models.Player, error)
 	Add(ctx context.Context, form models.PlayerForm) (int64, error)
-	GetByID(ctx context.Context, id int64) (*models.Player, error)
+	GetByID(ctx context.Context, id int64) (models.Player, error)
 	Update(ctx context.Context, id int64, form models.PlayerForm) (int64, error)
 }
 
@@ -59,16 +60,25 @@ func (s *PlayerService) Add(ctx context.Context, form models.PlayerForm) (int64,
 	return id, nil
 }
 
-func (s *PlayerService) GetByID(ctx context.Context, id int64) (*models.Player, error) {
-	var playerList []models.Player
+func (s *PlayerService) GetByID(ctx context.Context, id int64) (models.Player, error) {
+	var player models.Player
 
-	_ = s.MemCache.GetCacheTTLJSON(infraMemCache.Key15Min, models.KeyCachePlayerList, &playerList)
+	key := fmt.Sprintf(models.KeyCachePlayerID, id)
 
-	if len(playerList) > 0 {
-		return &playerList[0], nil
+	_ = s.MemCache.GetCacheTTLJSON(infraMemCache.Key15Min, key, &player)
+
+	if player.ID != 0 {
+		return player, nil
 	}
 
-	return s.PlayerRepo.GetByID(ctx, id)
+	player, err := s.PlayerRepo.GetByID(ctx, id)
+	if err != nil {
+		return models.Player{}, err
+	}
+
+	_ = s.MemCache.SetCacheTTLJSON(infraMemCache.Key15Min, key, player)
+
+	return player, nil
 }
 
 func (s *PlayerService) Update(ctx context.Context, id int64, form models.PlayerForm) (int64, error) {

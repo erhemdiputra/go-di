@@ -11,7 +11,7 @@ import (
 type IPlayerRepo interface {
 	GetList(ctx context.Context, form models.PlayerForm) ([]models.Player, error)
 	Add(ctx context.Context, form models.PlayerForm) (int64, error)
-	GetByID(ctx context.Context, id int64) (*models.Player, error)
+	GetByID(ctx context.Context, id int64) (models.Player, error)
 	Update(ctx context.Context, id int64, form models.PlayerForm) (int64, error)
 }
 
@@ -61,7 +61,7 @@ func (repo *PlayerRepo) Add(ctx context.Context, form models.PlayerForm) (int64,
 	return res.LastInsertId()
 }
 
-func (repo *PlayerRepo) GetByID(ctx context.Context, id int64) (*models.Player, error) {
+func (repo *PlayerRepo) GetByID(ctx context.Context, id int64) (models.Player, error) {
 	query := `SELECT id, full_name, club FROM players WHERE id = ?`
 
 	var player models.Player
@@ -69,12 +69,12 @@ func (repo *PlayerRepo) GetByID(ctx context.Context, id int64) (*models.Player, 
 	err := repo.DB.QueryRowContext(ctx, query, id).Scan(&player.ID, &player.FullName, &player.Club)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, err
+			return models.Player{}, err
 		}
-		return nil, fmt.Errorf("database query player by id error : {%+v}", err)
+		return models.Player{}, fmt.Errorf("database query player by id error : {%+v}", err)
 	}
 
-	return &player, nil
+	return player, nil
 }
 
 func (repo *PlayerRepo) Update(ctx context.Context, id int64, form models.PlayerForm) (int64, error) {

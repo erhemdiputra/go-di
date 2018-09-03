@@ -4,6 +4,7 @@ import "html"
 
 const (
 	KeyCachePlayerList = "player_list"
+	KeyCachePlayerID   = "player_id_%d"
 )
 
 type PlayerForm struct {
