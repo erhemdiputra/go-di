@@ -3,11 +3,11 @@
     Host        = "localhost"
     Port        = 9000
     Debug       = false
-    Timeout     = 10s
+    Timeout     = "10s"
 
 [Database]
     Host        = "localhost"
     Driver      = "mysql"
     Username    = "root"
-    Password    = "password"
+    Password    = ""
     Name        = "exercise-1"

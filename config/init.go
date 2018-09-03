@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	gcfg "gopkg.in/gcfg.v1"
+	"github.com/spf13/viper"
 )
 
 type MainConfig struct {
@@ -32,7 +32,7 @@ type DatabaseConfig struct {
 
 var (
 	globalCfg MainConfig
-	configDir = "./files/config/%s/main.ini"
+	configDir = "./files/config/%s/"
 )
 
 func init() {
@@ -46,7 +46,15 @@ func init() {
 }
 
 func Init() error {
-	if err := gcfg.ReadFileInto(&globalCfg, configDir); err != nil {
+	viper.SetConfigType("toml")
+	viper.SetConfigName("main")
+	viper.AddConfigPath(configDir)
+
+	if err := viper.ReadInConfig(); err != nil {
+		return err
+	}
+
+	if err := viper.Unmarshal(&globalCfg); err != nil {
 		return err
 	}
 
