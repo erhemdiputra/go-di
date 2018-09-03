@@ -12,7 +12,7 @@ var mapTemplate = make(map[string]*template.Template)
 
 func PopulateTemplate() {
 	var allFiles []string
-	templatesDir := "./templates/"
+	templatesDir := "./files/www/html/"
 
 	files, err := ioutil.ReadDir(templatesDir)
 	if err != nil {
