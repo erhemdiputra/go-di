@@ -9,5 +9,5 @@
     Host        = "localhost"
     Driver      = "mysql"
     Username    = "root"
-    Password    = ""
+    Password    = "password"
     Name        = "exercise-1"

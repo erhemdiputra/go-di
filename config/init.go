@@ -46,7 +46,6 @@ func init() {
 }
 
 func Init() error {
-	viper.SetConfigType("toml")
 	viper.SetConfigName("main")
 	viper.AddConfigPath(configDir)
 
